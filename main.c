@@ -203,7 +203,8 @@ int tokenizer_tokenize_bare_block(Cursor *c, size_t parent_indent) {
 		if (cursor_peek(c) == '\n') {
 			cursor_advance(c, 1);
 			size_t indent = 0;
-			while (cursor_remaining(c) > 0 && cursor_peek(c) == WS) {
+			while (cursor_remaining(c) > 0 &&
+			       (cursor_peek(c) == WS || cursor_peek(c) == '\n')) {
 				indent++;
 				cursor_advance(c, 1);
 			}
