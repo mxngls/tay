@@ -245,7 +245,6 @@ int tokenizer_tokenize_bare_str(Cursor *c) {
 		if (ch == ':'                                                                                              
 		    || ch == '\n'
 		    || ch == '['                                                                                           
-		    || ch == '\''                                                                                       
 		    || ch == '"'
 		    || ch == '|'
 		    || ch == '#') {
@@ -311,12 +310,6 @@ int tokenizer_tokenize_list(Cursor *c) {
 	while (cursor_remaining(c) != 0) {
 		if ((pos = str_first_not_of(cursor_current(c), cursor_remaining(c), WS)) != 0) {
 			cursor_advance(c, pos);
-			continue;
-		}
-		if (cursor_peek(c) == '\'') {
-			if (tokenizer_tokenize_str(c, '\'')) {
-				return -1;
-			}
 			continue;
 		}
 		if (cursor_peek(c) == '"') {
@@ -432,13 +425,6 @@ int tokenizer_tokenize_line(Cursor *c) {
 
 		if (cursor_peek(c) == '[') {
 			return tokenizer_tokenize_list(c);
-		}
-
-		if (cursor_peek(c) == '\'') {
-			if (tokenizer_tokenize_str(c, '\'')) {
-				return -1;
-			}
-			continue;
 		}
 
 		if (cursor_peek(c) == '"') {
