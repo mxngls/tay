@@ -441,6 +441,12 @@ int tokenizer_tokenize_line(Cursor *c) {
 		}
 
 		if (cursor_peek(c) == '|') {
+			if (array_push(&tokens, ((Token){.kind = TOKEN_PIPE,
+							 .start = cursor_current(c),
+							 .len = 1,
+							 .indent = array_back(&indents)}))) {
+				return -1;
+			};
 			cursor_advance(c, 1);
 			if (cursor_remaining(c) == 0 || cursor_peek(c) != '\n') {
 				fprintf(stderr, "%zu:%zu: Error: newline expected\n", c->line,
