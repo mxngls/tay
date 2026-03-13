@@ -1,0 +1,6 @@
+STRING     indent=0 "title"
+COLON      indent=0 ":"
+STRING     indent=0 "She said \"hello\""
+STRING     indent=0 "path"
+COLON      indent=0 ":"
+STRING     indent=0 "C:\\Users\\docs"

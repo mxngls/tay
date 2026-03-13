@@ -1,0 +1,6 @@
+STRING     indent=0 "title"
+COLON      indent=0 ":"
+STRING     indent=0 "My Document"
+STRING     indent=0 "created_at"
+COLON      indent=0 ":"
+STRING     indent=0 "2024-03-15 10:00:00"
