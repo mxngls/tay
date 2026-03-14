@@ -45,16 +45,16 @@ typedef struct post {
 } Post;
 
 typedef enum {
-	TOKEN_START,
 	TOKEN_STRING = 1,
 	TOKEN_COLON,
-	TOKEN_PIPE,
-	TOKEN_LBRACKET,
-	TOKEN_RBRACKET,
 	TOKEN_COMMA,
-	TOKEN_INDENT,
 	TOKEN_DEDENT,
 	TOKEN_END,
+	TOKEN_INDENT,
+	TOKEN_LBRACKET,
+	TOKEN_PIPE,
+	TOKEN_RBRACKET,
+	TOKEN_START,
 } TokenKind;
 
 typedef struct token {
@@ -540,13 +540,20 @@ int main(int argc, char **argv) {
 	Cursor cursor = {.data = buf, .len = len, .pos = 0, .line = 1, .col = 1};
 	tokenizer_tokenize(&cursor);
 
-	// clang-format ignore
+	// clang-format off
 	const char *token_kind_str[] = {
-	    [TOKEN_STRING] = "STRING",	   [TOKEN_COLON] = "COLON",	  [TOKEN_PIPE] = "PIPE",
-	    [TOKEN_LBRACKET] = "LBRACKET", [TOKEN_RBRACKET] = "RBRACKET", [TOKEN_COMMA] = "COMMA",
-	    [TOKEN_INDENT] = "INDENT",	   [TOKEN_DEDENT] = "DEDENT",	  [TOKEN_START] = "START",
+	    [TOKEN_STRING]	= "STRING",
+	    [TOKEN_COLON]	= "COLON",
+	    [TOKEN_COMMA]	= "COMMA",
+	    [TOKEN_DEDENT]	= "DEDENT",	  
 	    [TOKEN_END] = "END",
+	    [TOKEN_INDENT]	= "INDENT",	   
+	    [TOKEN_LBRACKET]	= "LBRACKET",
+	    [TOKEN_PIPE]	= "PIPE",
+	    [TOKEN_RBRACKET]	= "RBRACKET", 
+	    [TOKEN_START]	= "START",
 	};
+	// clang-format on
 
 	for (size_t i = 0; i < tokens.len; i++) {
 		Token t = tokens.items[i];
