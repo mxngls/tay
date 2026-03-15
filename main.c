@@ -243,9 +243,9 @@ int tokenizer_tokenize_bare_str(Cursor *c) {
 	while (cursor_remaining(c) > 0) {
 		char ch = cursor_peek(c);
 		// clang-format off
-		if (ch == ':'                                                                                              
+		if (ch == ':'
 		    || ch == '\n'
-		    || ch == '['                                                                                           
+		    || ch == '['
 		    || ch == '"'
 		    || ch == '|'
 		    || ch == '#'
@@ -350,6 +350,17 @@ int tokenizer_tokenize_list(Cursor *c) {
 		return -1;
 	};
 	cursor_advance(c, 1);
+
+	// skip trailing whitespace
+	while (cursor_remaining(c) > 0 && cursor_peek(c) == ' ') {
+		cursor_advance(c, 1);
+	}
+
+	if (cursor_peek(c) == '#') {
+		cursor_skip_line(c);
+		return 0;
+	}
+
 	if (cursor_remaining(c) == 0 || cursor_peek(c) != '\n') {
 		fprintf(stderr, "%zu:%zu: Error: no newline after ']'\n", c->line, c->col);
 		return -1;
@@ -546,7 +557,7 @@ int main(int argc, char **argv) {
 	    [TOKEN_COLON]	= "COLON",
 	    [TOKEN_COMMA]	= "COMMA",
 	    [TOKEN_DEDENT]	= "DEDENT",	  
-	    [TOKEN_END] = "END",
+	    [TOKEN_END]		= "END",
 	    [TOKEN_INDENT]	= "INDENT",	   
 	    [TOKEN_LBRACKET]	= "LBRACKET",
 	    [TOKEN_PIPE]	= "PIPE",
