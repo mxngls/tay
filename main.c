@@ -248,7 +248,8 @@ int tokenizer_tokenize_bare_str(Cursor *c) {
 		    || ch == '['                                                                                           
 		    || ch == '"'
 		    || ch == '|'
-		    || ch == '#') {
+		    || ch == '#'
+		    || ch == ' ') {
 		    break;
 		}
 		// clang-format on
