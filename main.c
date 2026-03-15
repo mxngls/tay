@@ -240,7 +240,6 @@ int tokenizer_tokenize_bare_block(Cursor *c, size_t parent_indent) {
 
 int tokenizer_tokenize_bare_str(Cursor *c) {
 	char *start = cursor_current(c);
-	size_t slice_start = c->pos;
 	while (cursor_remaining(c) > 0) {
 		char ch = cursor_peek(c);
 		// clang-format off
@@ -255,15 +254,15 @@ int tokenizer_tokenize_bare_str(Cursor *c) {
 		// clang-format on
 		cursor_advance(c, 1);
 	}
-	size_t slice_len = c->pos - slice_start;
-	// trim trailing whitespace
-	while (slice_len > 0 && (start[slice_len - 1] == ' ' || start[slice_len - 1] == '\t')) {
-		slice_len--;
+	size_t len = cursor_current(c) - start;
+	// skip trailing whitespace
+	while (cursor_remaining(c) > 0 && cursor_peek(c) == ' ') {
+		cursor_advance(c, 1);
 	}
-	if (slice_len > 0) {
+	if (len > 0) {
 		if (array_push(&tokens, ((Token){.kind = TOKEN_STRING,
 						 .start = start,
-						 .len = slice_len,
+						 .len = len,
 						 .indent = array_back(&indents)}))) {
 			return -1;
 		};
