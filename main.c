@@ -360,7 +360,7 @@ int tokenizer_tokenize_list(Cursor *c) {
 		return -1;
 	};
 
-		cursor_advance(c, 1);
+	cursor_advance(c, 1);
 	cursor_skip_ws(c);
 
 	if (cursor_peek(c) == '#') {
@@ -421,7 +421,7 @@ int tokenizer_tokenize_line(Cursor *c) {
 
 	// track possible indentation changes
 	if (pos != (size_t)array_back(&indents)) {
-		if (array_back(&indents)) {
+		if ((int64_t)pos > array_back(&indents)) {
 			if (tokenizer_indent(&tokens, pos, &indents)) {
 				return -1;
 			};
