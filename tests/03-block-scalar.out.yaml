@@ -6,3 +6,4 @@ STRING     indent=1 "  This is a multiline string.
 
   Blank lines work too.
 "
+END        indent=0 ""

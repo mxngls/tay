@@ -512,6 +512,7 @@ int tokenizer_tokenize(Cursor *c) {
 			return -1;
 		}
 	}
+	array_push(&tokens, ((Token){.kind = TOKEN_END, .start = NULL, .len = 0, .indent = 0}));
 	return 0;
 }
 

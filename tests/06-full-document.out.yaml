@@ -22,3 +22,4 @@ STRING     indent=1 "  This is a sample document demonstrating
 
   It includes multiline text blocks.
 "
+END        indent=0 ""
