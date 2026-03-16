@@ -538,7 +538,13 @@ int tokenizer_tokenize(Cursor *c) {
 			return -1;
 		}
 	}
+	while (indents.len > 1) {
+		if (tokenzier_dedent(&tokens, &indents)) {
+			return -1;
+		};
+	}
 	array_push(&tokens, ((Token){.kind = TOKEN_END, .start = NULL, .len = 0, .indent = 0}));
+
 	return 0;
 }
 
