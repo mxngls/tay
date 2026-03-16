@@ -202,6 +202,12 @@ void cursor_skip_line(Cursor *c) {
 	}
 }
 
+void cursor_skip_ws(Cursor *c) {
+	while (cursor_remaining(c) > 0 && cursor_peek(c) == ' ') {
+		cursor_advance(c, 1);
+	}
+}
+
 int tokenizer_tokenize_bare_block(Cursor *c, size_t parent_indent) {
 	char *start = cursor_current(c);
 	size_t start_pos = c->pos;
@@ -262,10 +268,7 @@ int tokenizer_tokenize_bare_str(Cursor *c) {
 		cursor_advance(c, 1);
 	}
 	size_t len = cursor_current(c) - start;
-	// skip trailing whitespace
-	while (cursor_remaining(c) > 0 && cursor_peek(c) == ' ') {
-		cursor_advance(c, 1);
-	}
+	cursor_skip_ws(c);
 	if (len > 0) {
 		if (array_push(&tokens, ((Token){.kind = TOKEN_STRING,
 						 .start = start,
@@ -355,12 +358,9 @@ int tokenizer_tokenize_list(Cursor *c) {
 					 .indent = array_back(&indents)}))) {
 		return -1;
 	};
-	cursor_advance(c, 1);
 
-	// skip trailing whitespace
-	while (cursor_remaining(c) > 0 && cursor_peek(c) == ' ') {
 		cursor_advance(c, 1);
-	}
+	cursor_skip_ws(c);
 
 	if (cursor_peek(c) == '#') {
 		cursor_skip_line(c);
