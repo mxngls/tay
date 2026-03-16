@@ -166,10 +166,10 @@ size_t str_find(char *str, size_t str_len, char marker) {
 	return NPOS;
 }
 
-int tokenizer_indent(Cursor *c, TokenArray *token_arr, int64_t depth, IndentArray *indent_arr) {
+int tokenizer_indent(TokenArray *token_arr, int64_t depth, IndentArray *indent_arr) {
 	if (array_push(token_arr, ((Token){.kind = TOKEN_INDENT,
-					   .start = cursor_current(c),
-					   .len = cursor_remaining(c),
+					   .start = NULL,
+					   .len = 0,
 					   .indent = array_back(&indents)})))
 		return -1;
 	if (array_push(indent_arr, depth))
@@ -177,11 +177,11 @@ int tokenizer_indent(Cursor *c, TokenArray *token_arr, int64_t depth, IndentArra
 	return 0;
 }
 
-int tokenzier_dedent(Cursor *c, TokenArray *token_arr, IndentArray *indent_arr) {
+int tokenzier_dedent(TokenArray *token_arr, IndentArray *indent_arr) {
 	if (array_push(token_arr, ((Token){
 				      .kind = TOKEN_DEDENT,
-				      .start = cursor_current(c),
-				      .len = cursor_remaining(c),
+				      .start = NULL,
+				      .len = 0,
 				      .indent = array_back(indent_arr),
 				  }))) {
 		return -1;
@@ -379,7 +379,7 @@ int tokenizer_tokenize_line(Cursor *c) {
 	// find YAML start marker
 	if (str_starts_with(cursor_current(c), cursor_remaining(c), "---", strlen("---"))) {
 		while (indents.len > 1) {
-			tokenzier_dedent(c, &tokens, &indents);
+			tokenzier_dedent(&tokens, &indents);
 		}
 		if (array_push(&tokens, ((Token){
 					    .kind = TOKEN_START,
@@ -396,7 +396,7 @@ int tokenizer_tokenize_line(Cursor *c) {
 	// find YAML end marker
 	if (str_starts_with(cursor_current(c), cursor_remaining(c), "...", strlen("..."))) {
 		while (indents.len > 1) {
-			tokenzier_dedent(c, &tokens, &indents);
+			tokenzier_dedent(&tokens, &indents);
 		}
 		if (array_push(&tokens, ((Token){
 					    .kind = TOKEN_END,
@@ -419,11 +419,13 @@ int tokenizer_tokenize_line(Cursor *c) {
 	// track possible indentation changes
 	if (pos != (size_t)array_back(&indents)) {
 		if (array_back(&indents)) {
-			tokenizer_indent(c, &tokens, pos, &indents);
+			if (tokenizer_indent(&tokens, pos, &indents)) {
+				return -1;
+			};
 		} else {
 			while (pos != (size_t)array_back(&indents)) {
 				if (pos < (size_t)array_back(&indents)) {
-					tokenzier_dedent(c, &tokens, &indents);
+					tokenzier_dedent(&tokens, &indents);
 				} else {
 					fprintf(stderr, "%zu:%zu: Error: bad indent\n", c->line,
 						c->col);
@@ -556,7 +558,9 @@ int main(int argc, char **argv) {
 	};
 
 	Cursor cursor = {.data = buf, .len = len, .pos = 0, .line = 1, .col = 1};
-	tokenizer_tokenize(&cursor);
+	if (tokenizer_tokenize(&cursor)) {
+		return -1;
+	};
 
 	// clang-format off
 	const char *token_kind_str[] = {
