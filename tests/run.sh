@@ -1,8 +1,8 @@
 #!/bin/sh
 set -e
 
-BIN="${1:?usage: run.sh <binary>}"
-TESTS_DIR="$(dirname "$0")"
+BIN="${1:?usage: run.sh <binary> <test-dir>}"
+TESTS_DIR="${2:?usage: run.sh <binary> <test-dir>}"
 PASS=0
 FAIL=0
 
