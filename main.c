@@ -128,7 +128,7 @@ char cursor_peek(Cursor *c) { return c->data[c->pos]; }
 
 char *cursor_current(Cursor *c) { return c->data + c->pos; }
 
-size_t cursor_remaining(Cursor *c) { return c->len - c->pos; }
+size_t cursor_remaining_count(Cursor *c) { return c->len - c->pos; }
 
 int is_separator(char *str, size_t str_len, char ch) {
 	if (str_len == 0 || str[0] != ch)
@@ -194,7 +194,7 @@ int tokenzier_dedent(TokenArray *token_arr, IndentArray *indent_arr) {
 }
 
 void cursor_skip_line(Cursor *c) {
-	while (cursor_remaining(c) > 0) {
+	while (cursor_remaining_count(c) > 0) {
 		if (cursor_peek(c) == '\n') {
 			cursor_advance(c, 1);
 			return;
@@ -204,7 +204,7 @@ void cursor_skip_line(Cursor *c) {
 }
 
 void cursor_skip_ws(Cursor *c) {
-	while (cursor_remaining(c) > 0 && cursor_peek(c) == ' ') {
+	while (cursor_remaining_count(c) > 0 && cursor_peek(c) == ' ') {
 		cursor_advance(c, 1);
 	}
 }
@@ -213,11 +213,11 @@ int tokenizer_tokenize_bare_block(Cursor *c, size_t parent_indent) {
 	char *start = cursor_current(c);
 	size_t start_pos = c->pos;
 
-	while (cursor_remaining(c) > 0) {
+	while (cursor_remaining_count(c) > 0) {
 		if (cursor_peek(c) == '\n') {
 			cursor_advance(c, 1);
 			size_t indent = 0;
-			while (cursor_remaining(c) > 0 &&
+			while (cursor_remaining_count(c) > 0 &&
 			       (cursor_peek(c) == WS || cursor_peek(c) == '\n')) {
 				indent++;
 				cursor_advance(c, 1);
@@ -253,7 +253,7 @@ int tokenizer_tokenize_bare_block(Cursor *c, size_t parent_indent) {
 
 int tokenizer_tokenize_bare_str(Cursor *c) {
 	char *start = cursor_current(c);
-	while (cursor_remaining(c) > 0) {
+	while (cursor_remaining_count(c) > 0) {
 		char ch = cursor_peek(c);
 		// clang-format off
 		if (ch == '\n'
@@ -261,7 +261,7 @@ int tokenizer_tokenize_bare_str(Cursor *c) {
 		    || ch == '"'
 		    || ch == '|'
 		    || ch == ' '
-		    || is_separator(cursor_current(c), cursor_remaining(c), ':')
+		    || is_separator(cursor_current(c), cursor_remaining_count(c), ':')
 		    ) {
 		    break;
 		}
@@ -286,7 +286,7 @@ int tokenizer_tokenize_str(Cursor *c, char end) {
 	cursor_advance(c, 1);
 
 	char *start = cursor_current(c);
-	size_t pos = str_find(start, cursor_remaining(c), end);
+	size_t pos = str_find(start, cursor_remaining_count(c), end);
 
 	if (pos == NPOS) {
 		fprintf(stderr, "%zu:%zu: Error: Unterminated string literal\n", c->line, c->col);
@@ -319,8 +319,9 @@ int tokenizer_tokenize_list(Cursor *c) {
 	cursor_advance(c, 1);
 
 	size_t pos = 0;
-	while (cursor_remaining(c) != 0) {
-		if ((pos = str_first_not_of(cursor_current(c), cursor_remaining(c), WS)) != 0) {
+	while (cursor_remaining_count(c) != 0) {
+		if ((pos = str_first_not_of(cursor_current(c), cursor_remaining_count(c), WS)) !=
+		    0) {
 			cursor_advance(c, pos);
 			continue;
 		}
@@ -348,7 +349,7 @@ int tokenizer_tokenize_list(Cursor *c) {
 		return -1;
 	}
 
-	if (cursor_remaining(c) == 0) {
+	if (cursor_remaining_count(c) == 0) {
 		fprintf(stderr, "%zu:%zu: Error: unclosed list\n", c->line, c->col);
 		return -1;
 	}
@@ -368,7 +369,7 @@ int tokenizer_tokenize_list(Cursor *c) {
 		return 0;
 	}
 
-	if (cursor_remaining(c) == 0 || cursor_peek(c) != '\n') {
+	if (cursor_remaining_count(c) == 0 || cursor_peek(c) != '\n') {
 		fprintf(stderr, "%zu:%zu: Error: no newline after ']'\n", c->line, c->col);
 		return -1;
 	}
@@ -380,7 +381,7 @@ int tokenizer_tokenize_line(Cursor *c) {
 	char *line_start = cursor_current(c);
 
 	// find YAML start marker
-	if (str_starts_with(cursor_current(c), cursor_remaining(c), "---", strlen("---"))) {
+	if (str_starts_with(cursor_current(c), cursor_remaining_count(c), "---", strlen("---"))) {
 		while (indents.len > 1) {
 			tokenzier_dedent(&tokens, &indents);
 		}
@@ -397,7 +398,7 @@ int tokenizer_tokenize_line(Cursor *c) {
 	}
 
 	// find YAML end marker
-	if (str_starts_with(cursor_current(c), cursor_remaining(c), "...", strlen("..."))) {
+	if (str_starts_with(cursor_current(c), cursor_remaining_count(c), "...", strlen("..."))) {
 		while (indents.len > 1) {
 			tokenzier_dedent(&tokens, &indents);
 		}
@@ -409,11 +410,11 @@ int tokenizer_tokenize_line(Cursor *c) {
 					}))) {
 			return -1;
 		};
-		cursor_advance(c, cursor_remaining(c));
+		cursor_advance(c, cursor_remaining_count(c));
 		return 0;
 	}
 
-	size_t pos = str_first_not_of(cursor_current(c), cursor_remaining(c), WS);
+	size_t pos = str_first_not_of(cursor_current(c), cursor_remaining_count(c), WS);
 	if (pos == NPOS || cursor_current(c)[pos] == '#' || cursor_current(c)[pos] == '\n') {
 		cursor_skip_line(c);
 		return 0;
@@ -440,7 +441,7 @@ int tokenizer_tokenize_line(Cursor *c) {
 
 	cursor_advance(c, pos);
 
-	while (cursor_remaining(c) != 0) {
+	while (cursor_remaining_count(c) != 0) {
 		if (cursor_peek(c) == '\n') {
 			cursor_advance(c, 1);
 			return 0;
@@ -465,13 +466,13 @@ int tokenizer_tokenize_line(Cursor *c) {
 				return -1;
 			};
 			cursor_advance(c, 1);
-			if (cursor_remaining(c) == 0 || cursor_peek(c) != '\n') {
+			if (cursor_remaining_count(c) == 0 || cursor_peek(c) != '\n') {
 				fprintf(stderr, "%zu:%zu: Error: newline expected\n", c->line,
 					c->col);
 				return -1;
 			}
 			cursor_advance(c, 1);
-			if (cursor_remaining(c) == 0 || cursor_peek(c) != ' ') {
+			if (cursor_remaining_count(c) == 0 || cursor_peek(c) != ' ') {
 				fprintf(stderr, "%zu:%zu: Error: indent expected\n", c->line,
 					c->col);
 				return -1;
@@ -482,7 +483,7 @@ int tokenizer_tokenize_line(Cursor *c) {
 			return 0;
 		}
 
-		if (str_starts_with(cursor_current(c), cursor_remaining(c), "- ", 2)) {
+		if (str_starts_with(cursor_current(c), cursor_remaining_count(c), "- ", 2)) {
 			if (array_push(&tokens, ((Token){.kind = TOKEN_DASH,
 							 .start = cursor_current(c),
 							 .len = 1,
@@ -490,7 +491,8 @@ int tokenizer_tokenize_line(Cursor *c) {
 				return -1;
 			};
 			cursor_advance(c, 1);
-			size_t pos = str_first_not_of(cursor_current(c), cursor_remaining(c), WS);
+			size_t pos =
+			    str_first_not_of(cursor_current(c), cursor_remaining_count(c), WS);
 			if (pos == NPOS || cursor_current(c)[pos] == '\n') {
 				cursor_skip_line(c);
 				return 0;
@@ -507,7 +509,7 @@ int tokenizer_tokenize_line(Cursor *c) {
 			return 0;
 		}
 
-		if (is_separator(cursor_current(c), cursor_remaining(c), ':')) {
+		if (is_separator(cursor_current(c), cursor_remaining_count(c), ':')) {
 			if (array_push(&tokens, ((Token){.kind = TOKEN_COLON,
 							 .start = cursor_current(c),
 							 .len = 1,
@@ -515,7 +517,8 @@ int tokenizer_tokenize_line(Cursor *c) {
 				return -1;
 			};
 			cursor_advance(c, 1);
-			size_t pos = str_first_not_of(cursor_current(c), cursor_remaining(c), WS);
+			size_t pos =
+			    str_first_not_of(cursor_current(c), cursor_remaining_count(c), WS);
 			if (pos == NPOS || cursor_current(c)[pos] == '\n') {
 				cursor_skip_line(c);
 				return 0;
@@ -533,7 +536,7 @@ int tokenizer_tokenize_line(Cursor *c) {
 }
 
 int tokenizer_tokenize(Cursor *c) {
-	while (cursor_remaining(c) != 0) {
+	while (cursor_remaining_count(c) != 0) {
 		if (tokenizer_tokenize_line(c)) {
 			return -1;
 		}
