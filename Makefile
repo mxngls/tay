@@ -2,6 +2,7 @@ CC = cc
 CFLAGS = -std=c11 -Wall -Wextra -fsanitize=address,undefined -fno-omit-frame-pointer -g
 LDFLAGS = -fsanitize=address,undefined
 
+SRC = src
 BUILD = build
 
 OUT = $(BUILD)/tay
@@ -16,9 +17,9 @@ $(OUT): $(OBJ)
 $(TEST_TOKENIZER): $(TEST_TOKENIZER_OBJ)
 	$(CC) $(LDFLAGS) -o $(TEST_TOKENIZER) $(TEST_TOKENIZER_OBJ)
 
-$(BUILD)/tokenizer.o $(BUILD)/test_tokenizer.o: tokenizer.h
+$(BUILD)/tokenizer.o $(BUILD)/test_tokenizer.o: $(SRC)/tokenizer.h
 
-$(BUILD)/%.o: %.c | $(BUILD)
+$(BUILD)/%.o: $(SRC)/%.c | $(BUILD)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILD):
