@@ -33,33 +33,6 @@
 #define NPOS (size_t)-1
 #define WS ' '
 
-// NOTE: Keep as reference for later
-// typedef enum {
-// 	YAML_STRING,
-// 	YAML_BLOCK_STRING,
-// 	YAML_LIST,
-// } YamlValueKind;
-//
-// typedef struct yaml_value {
-// 	YamlValueKind kind;
-// 	union {
-// 		struct {
-// 			char *start;
-// 			size_t len;
-// 		} string;
-// 		struct {
-// 			struct YamlValue *items;
-// 			size_t count;
-// 		} list;
-// 	};
-// } YamlValue;
-//
-// typedef struct yaml_entry {
-// 	char *key;
-// 	size_t key_len;
-// 	YamlValue value;
-// } YamlEntry;
-
 static void cursor_advance(Cursor* c, size_t n) {
     for (size_t i = 0; i < n && c->pos < c->len; i++) {
         if (c->data[c->pos] == '\n') {

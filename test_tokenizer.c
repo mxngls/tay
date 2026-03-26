@@ -19,49 +19,49 @@ static const char *token_kind_str[] = {
 };
 // clang-format on
 
-int main(int argc, char **argv) {
-	if (argc != 2) {
-		fprintf(stderr, "Error: expected exactly one input path");
-		return -1;
-	}
-	char *input_file_name = *++argv;
+int main(int argc, char** argv) {
+    if (argc != 2) {
+        fprintf(stderr, "Error: expected exactly one input path");
+        return -1;
+    }
+    char* input_file_name = *++argv;
 
-	FILE *input_file = fopen(input_file_name, "r");
-	if (!input_file) {
-		fprintf(stderr, "Error opening \"%s\"\n. Exit.", input_file_name);
-		return 1;
-	}
+    FILE* input_file = fopen(input_file_name, "r");
+    if (!input_file) {
+        fprintf(stderr, "Error opening \"%s\"\n. Exit.", input_file_name);
+        return 1;
+    }
 
-	char *buf = calloc(513, sizeof(char));
-	if (!buf) {
-		fprintf(stderr, "Error allocating memory. Exit.");
-		fclose(input_file);
-		return 1;
-	}
+    char* buf = calloc(513, sizeof(char));
+    if (!buf) {
+        fprintf(stderr, "Error allocating memory. Exit.");
+        fclose(input_file);
+        return 1;
+    }
 
-	size_t len = fread(buf, sizeof(char), 512, input_file);
-	if (ferror(input_file)) {
-		fprintf(stderr, "Error reading \"%s\". Exit.", input_file_name);
-		free(buf);
-		fclose(input_file);
-		return 1;
-	}
-	buf[len] = '\0';
-	fclose(input_file);
+    size_t len = fread(buf, sizeof(char), 512, input_file);
+    if (ferror(input_file)) {
+        fprintf(stderr, "Error reading \"%s\". Exit.", input_file_name);
+        free(buf);
+        fclose(input_file);
+        return 1;
+    }
+    buf[len] = '\0';
+    fclose(input_file);
 
-	Cursor cursor = {.data = buf, .len = len, .pos = 0, .line = 1, .col = 1};
-	static TokenArray tokens = {.len = 0};
-	if (tokenizer_tokenize(&cursor, &tokens)) {
-		free(buf);
-		return -1;
-	};
+    Cursor            cursor = {.data = buf, .len = len, .pos = 0, .line = 1, .col = 1};
+    static TokenArray tokens = {.len = 0};
+    if (tokenizer_tokenize(&cursor, &tokens)) {
+        free(buf);
+        return -1;
+    };
 
-	for (size_t i = 0; i < tokens.len; i++) {
-		Token t = tokens.items[i];
-		printf("%-10s indent=%zu \"%.*s\"\n", token_kind_str[t.kind], t.indent, (int)t.len,
-		       t.start);
-	}
+    for (size_t i = 0; i < tokens.len; i++) {
+        Token t = tokens.items[i];
+        printf("%-10s indent=%zu \"%.*s\"\n", token_kind_str[t.kind], t.indent, (int)t.len,
+               t.start);
+    }
 
-	free(buf);
-	return 0;
+    free(buf);
+    return 0;
 }
