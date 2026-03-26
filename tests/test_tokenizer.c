@@ -49,7 +49,7 @@ int main(int argc, char** argv) {
     buf[len] = '\0';
     fclose(input_file);
 
-    Cursor            cursor = {.data = buf, .len = len, .pos = 0, .line = 1, .col = 1};
+    TayCursor         cursor = {.data = buf, .len = len, .pos = 0, .line = 1, .col = 1};
     static TokenArray tokens = {.len = 0, .cap = 0, .items = NULL};
     if (tokenizer_tokenize(&cursor, &tokens)) {
         free(buf);
@@ -57,9 +57,9 @@ int main(int argc, char** argv) {
     };
 
     for (size_t i = 0; i < tokens.len; i++) {
-        Token t = tokens.items[i];
-        printf("%-10s indent=%zu \"%.*s\"\n", token_kind_str[t.kind], t.indent, (int)t.len,
-               t.start);
+        TayToken t = tokens.items[i];
+        char*    text = t.start ? t.start : "";
+        printf("%-10s indent=%zu \"%.*s\"\n", token_kind_str[t.kind], t.indent, (int)t.len, text);
     }
 
     free(buf);

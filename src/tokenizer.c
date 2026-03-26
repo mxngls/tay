@@ -9,7 +9,7 @@
 #define NPOS (size_t)-1
 #define WS ' '
 
-static void cursor_advance(Cursor* c, size_t n) {
+static void cursor_advance(TayCursor* c, size_t n) {
     for (size_t i = 0; i < n && c->pos < c->len; i++) {
         if (c->data[c->pos] == '\n') {
             c->line++;
@@ -20,12 +20,9 @@ static void cursor_advance(Cursor* c, size_t n) {
         c->pos++;
     }
 }
-
-static char cursor_peek(Cursor* c) { return c->data[c->pos]; }
-
-static char* cursor_current(Cursor* c) { return c->data + c->pos; }
-
-static size_t cursor_remaining_count(Cursor* c) { return c->len - c->pos; }
+static char   cursor_peek(TayCursor* c) { return c->data[c->pos]; }
+static char*  cursor_current(TayCursor* c) { return c->data + c->pos; }
+static size_t cursor_remaining_count(TayCursor* c) { return c->len - c->pos; }
 
 static int is_separator(char* str, size_t str_len, char ch) {
     if (str_len == 0 || str[0] != ch)
@@ -64,10 +61,10 @@ static size_t str_find(char* str, size_t str_len, char marker) {
     return NPOS;
 }
 
-static int tokenizer_indent(TokenArray* token_arr, int64_t depth, IndentArray* indent_arr) {
+static int tokenizer_indent(TokenArray* token_arr, int64_t depth, TayIndentArray* indent_arr) {
     if (array_push(
             token_arr,
-            ((Token){
+            ((TayToken){
                 .kind = TOKEN_INDENT, .start = NULL, .len = 0, .indent = array_back(indent_arr)})))
         return -1;
     if (array_push(indent_arr, depth))
@@ -75,8 +72,8 @@ static int tokenizer_indent(TokenArray* token_arr, int64_t depth, IndentArray* i
     return 0;
 }
 
-static int tokenzier_dedent(TokenArray* token_arr, IndentArray* indent_arr) {
-    if (array_push(token_arr, ((Token){
+static int tokenzier_dedent(TokenArray* token_arr, TayIndentArray* indent_arr) {
+    if (array_push(token_arr, ((TayToken){
                                   .kind = TOKEN_DEDENT,
                                   .start = NULL,
                                   .len = 0,
@@ -90,7 +87,7 @@ static int tokenzier_dedent(TokenArray* token_arr, IndentArray* indent_arr) {
     return 0;
 }
 
-static void cursor_skip_line(Cursor* c) {
+static void cursor_skip_line(TayCursor* c) {
     while (cursor_remaining_count(c) > 0) {
         if (cursor_peek(c) == '\n') {
             cursor_advance(c, 1);
@@ -100,13 +97,13 @@ static void cursor_skip_line(Cursor* c) {
     }
 }
 
-static void cursor_skip_ws(Cursor* c) {
+static void cursor_skip_ws(TayCursor* c) {
     while (cursor_remaining_count(c) > 0 && cursor_peek(c) == ' ') {
         cursor_advance(c, 1);
     }
 }
 
-static int tokenizer_tokenize_bare_block(Cursor* c, size_t parent_indent, TokenArray* tokens) {
+static int tokenizer_tokenize_bare_block(TayCursor* c, size_t parent_indent, TokenArray* tokens) {
     char*  start = cursor_current(c);
     size_t start_pos = c->pos;
 
@@ -121,7 +118,7 @@ static int tokenizer_tokenize_bare_block(Cursor* c, size_t parent_indent, TokenA
             }
             // end of block reached
             if (indent <= parent_indent) {
-                if (array_push(tokens, ((Token){
+                if (array_push(tokens, ((TayToken){
                                            .kind = TOKEN_STRING,
                                            .start = start,
                                            .len = c->pos - start_pos,
@@ -137,7 +134,7 @@ static int tokenizer_tokenize_bare_block(Cursor* c, size_t parent_indent, TokenA
     }
 
     // reached end of input
-    if (array_push(tokens, ((Token){
+    if (array_push(tokens, ((TayToken){
                                .kind = TOKEN_STRING,
                                .start = start,
                                .len = c->pos - start_pos,
@@ -148,7 +145,7 @@ static int tokenizer_tokenize_bare_block(Cursor* c, size_t parent_indent, TokenA
     return 0;
 }
 
-static int tokenizer_tokenize_bare_str(Cursor* c, TokenArray* tokens, IndentArray* indents) {
+static int tokenizer_tokenize_bare_str(TayCursor* c, TokenArray* tokens, TayIndentArray* indents) {
     char* start = cursor_current(c);
     while (cursor_remaining_count(c) > 0) {
         char ch = cursor_peek(c);
@@ -168,17 +165,18 @@ static int tokenizer_tokenize_bare_str(Cursor* c, TokenArray* tokens, IndentArra
     size_t len = cursor_current(c) - start;
     cursor_skip_ws(c);
     if (len > 0) {
-        if (array_push(tokens, ((Token){.kind = TOKEN_STRING,
-                                        .start = start,
-                                        .len = len,
-                                        .indent = array_back(indents)}))) {
+        if (array_push(tokens, ((TayToken){.kind = TOKEN_STRING,
+                                           .start = start,
+                                           .len = len,
+                                           .indent = array_back(indents)}))) {
             return -1;
         };
     }
     return 0;
 }
 
-static int tokenizer_tokenize_str(Cursor* c, char end, TokenArray* tokens, IndentArray* indents) {
+static int tokenizer_tokenize_str(TayCursor* c, char end, TokenArray* tokens,
+                                  TayIndentArray* indents) {
     // skip opening delimiter
     cursor_advance(c, 1);
 
@@ -190,7 +188,7 @@ static int tokenizer_tokenize_str(Cursor* c, char end, TokenArray* tokens, Inden
         return -1;
     }
 
-    if (array_push(tokens, ((Token){
+    if (array_push(tokens, ((TayToken){
                                .kind = TOKEN_STRING,
                                .start = start,
                                .len = pos,
@@ -204,8 +202,8 @@ static int tokenizer_tokenize_str(Cursor* c, char end, TokenArray* tokens, Inden
     return 0;
 }
 
-static int tokenizer_tokenize_list(Cursor* c, TokenArray* tokens, IndentArray* indents) {
-    if (array_push(tokens, ((Token){
+static int tokenizer_tokenize_list(TayCursor* c, TokenArray* tokens, TayIndentArray* indents) {
+    if (array_push(tokens, ((TayToken){
                                .kind = TOKEN_LBRACKET,
                                .start = cursor_current(c),
                                .len = 1,
@@ -228,10 +226,10 @@ static int tokenizer_tokenize_list(Cursor* c, TokenArray* tokens, IndentArray* i
             continue;
         }
         if (cursor_peek(c) == ',') {
-            if (array_push(tokens, ((Token){.kind = TOKEN_COMMA,
-                                            .start = cursor_current(c),
-                                            .len = 1,
-                                            .indent = array_back(indents)}))) {
+            if (array_push(tokens, ((TayToken){.kind = TOKEN_COMMA,
+                                               .start = cursor_current(c),
+                                               .len = 1,
+                                               .indent = array_back(indents)}))) {
                 return -1;
             };
             cursor_advance(c, 1);
@@ -250,10 +248,10 @@ static int tokenizer_tokenize_list(Cursor* c, TokenArray* tokens, IndentArray* i
         return -1;
     }
 
-    if (array_push(tokens, ((Token){.kind = TOKEN_RBRACKET,
-                                    .start = cursor_current(c),
-                                    .len = 1,
-                                    .indent = array_back(indents)}))) {
+    if (array_push(tokens, ((TayToken){.kind = TOKEN_RBRACKET,
+                                       .start = cursor_current(c),
+                                       .len = 1,
+                                       .indent = array_back(indents)}))) {
         return -1;
     };
 
@@ -273,7 +271,7 @@ static int tokenizer_tokenize_list(Cursor* c, TokenArray* tokens, IndentArray* i
     return 0;
 }
 
-static int tokenizer_tokenize_line(Cursor* c, TokenArray* tokens, IndentArray* indents) {
+static int tokenizer_tokenize_line(TayCursor* c, TokenArray* tokens, TayIndentArray* indents) {
     char* line_start = cursor_current(c);
 
     // find YAML start marker
@@ -281,7 +279,7 @@ static int tokenizer_tokenize_line(Cursor* c, TokenArray* tokens, IndentArray* i
         while (indents->len > 1) {
             tokenzier_dedent(tokens, indents);
         }
-        if (array_push(tokens, ((Token){
+        if (array_push(tokens, ((TayToken){
                                    .kind = TOKEN_START,
                                    .start = cursor_current(c),
                                    .len = 3,
@@ -298,7 +296,7 @@ static int tokenizer_tokenize_line(Cursor* c, TokenArray* tokens, IndentArray* i
         while (indents->len > 1) {
             tokenzier_dedent(tokens, indents);
         }
-        if (array_push(tokens, ((Token){
+        if (array_push(tokens, ((TayToken){
                                    .kind = TOKEN_END,
                                    .start = cursor_current(c),
                                    .len = 3,
@@ -354,10 +352,10 @@ static int tokenizer_tokenize_line(Cursor* c, TokenArray* tokens, IndentArray* i
         }
 
         if (cursor_peek(c) == '|') {
-            if (array_push(tokens, ((Token){.kind = TOKEN_PIPE,
-                                            .start = cursor_current(c),
-                                            .len = 1,
-                                            .indent = array_back(indents)}))) {
+            if (array_push(tokens, ((TayToken){.kind = TOKEN_PIPE,
+                                               .start = cursor_current(c),
+                                               .len = 1,
+                                               .indent = array_back(indents)}))) {
                 return -1;
             };
             cursor_advance(c, 1);
@@ -377,10 +375,10 @@ static int tokenizer_tokenize_line(Cursor* c, TokenArray* tokens, IndentArray* i
         }
 
         if (str_starts_with(cursor_current(c), cursor_remaining_count(c), "- ", 2)) {
-            if (array_push(tokens, ((Token){.kind = TOKEN_DASH,
-                                            .start = cursor_current(c),
-                                            .len = 1,
-                                            .indent = array_back(indents)}))) {
+            if (array_push(tokens, ((TayToken){.kind = TOKEN_DASH,
+                                               .start = cursor_current(c),
+                                               .len = 1,
+                                               .indent = array_back(indents)}))) {
                 return -1;
             };
             cursor_advance(c, 1);
@@ -402,10 +400,10 @@ static int tokenizer_tokenize_line(Cursor* c, TokenArray* tokens, IndentArray* i
         }
 
         if (is_separator(cursor_current(c), cursor_remaining_count(c), ':')) {
-            if (array_push(tokens, ((Token){.kind = TOKEN_COLON,
-                                            .start = cursor_current(c),
-                                            .len = 1,
-                                            .indent = array_back(indents)}))) {
+            if (array_push(tokens, ((TayToken){.kind = TOKEN_COLON,
+                                               .start = cursor_current(c),
+                                               .len = 1,
+                                               .indent = array_back(indents)}))) {
                 return -1;
             };
             cursor_advance(c, 1);
@@ -426,10 +424,10 @@ static int tokenizer_tokenize_line(Cursor* c, TokenArray* tokens, IndentArray* i
     return 0;
 }
 
-int tokenizer_tokenize(Cursor* c, TokenArray* tokens) {
+int tokenizer_tokenize(TayCursor* c, TokenArray* tokens) {
     int ret = 0;
 
-    IndentArray indents = {.len = 0, .cap = 0, .items = NULL};
+    TayIndentArray indents = {.len = 0, .cap = 0, .items = NULL};
     array_push(&indents, 0);
 
     while (cursor_remaining_count(c) != 0) {
@@ -444,7 +442,7 @@ int tokenizer_tokenize(Cursor* c, TokenArray* tokens) {
             goto error;
         };
     }
-    array_push(tokens, ((Token){.kind = TOKEN_END, .start = NULL, .len = 0, .indent = 0}));
+    array_push(tokens, ((TayToken){.kind = TOKEN_END, .start = NULL, .len = 0, .indent = 0}));
     goto done;
 
 error:

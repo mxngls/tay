@@ -12,7 +12,7 @@ typedef struct cursor {
     size_t pos;
     size_t line;
     size_t col;
-} Cursor;
+} TayCursor;
 
 typedef enum {
     TOKEN_STRING = 1,
@@ -33,20 +33,20 @@ typedef struct token {
     char*     start;
     size_t    len;
     size_t    indent;
-} Token;
+} TayToken;
 
 typedef struct token_array {
-    size_t len;
-    size_t cap;
-    Token* items;
+    size_t    len;
+    size_t    cap;
+    TayToken* items;
 } TokenArray;
 
 typedef struct indent_array {
     size_t   len;
     size_t   cap;
     int64_t* items;
-} IndentArray;
+} TayIndentArray;
 
-int tokenizer_tokenize(Cursor* c, TokenArray* tokens);
+int tokenizer_tokenize(TayCursor* c, TokenArray* tokens);
 
 #endif

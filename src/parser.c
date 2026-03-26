@@ -6,7 +6,10 @@
 #include "tokenizer.h"
 
 int parser_parse_element(TokenArray* token_arr, size_t* pos, TayNode* out) {
-    if (token_arr->items[*pos].kind == TOKEN_INDENT) {
+    TayToken curr_token = token_arr->items[*pos];
+    TayToken next_curr_token = token_arr->items[*pos + 1];
+
+    if (curr_token.kind == TOKEN_INDENT) {
         (*pos)++;
         int err = parser_parse_element(token_arr, pos, out);
         if (err)
@@ -15,26 +18,29 @@ int parser_parse_element(TokenArray* token_arr, size_t* pos, TayNode* out) {
         return 0;
     }
 
-    if (token_arr->items[*pos].kind == TOKEN_DASH) {
+    if (curr_token.kind == TOKEN_DASH) {
         return parser_parse_list(token_arr, pos, out);
     }
 
-    if (token_arr->len > 2 && token_arr->items[*pos].kind == TOKEN_STRING &&
-        token_arr->items[*pos + 1].kind == TOKEN_COLON) {
+    if (token_arr->len > 2 && curr_token.kind == TOKEN_STRING &&
+        next_curr_token.kind == TOKEN_COLON) {
         return parser_parse_map(token_arr, pos, out);
     }
 
     (*pos)++;
+
     return parser_parse_element(token_arr, pos, out);
 }
 
 int parser_parse_flow_element(TokenArray* token_arr, size_t* pos, TayNode* out) {
-    if (token_arr->items[*pos].kind == TOKEN_LBRACKET) {
+    TayToken curr_token = token_arr->items[*pos];
+
+    if (curr_token.kind == TOKEN_LBRACKET) {
         (*pos)++;
         return parser_parse_flow_list(token_arr, pos, out);
     }
 
-    if (token_arr->items[*pos].kind != TOKEN_STRING) {
+    if (curr_token.kind != TOKEN_STRING) {
         fprintf(stderr, "Error: string expected\n");
         return -1;
     }
@@ -43,8 +49,8 @@ int parser_parse_flow_element(TokenArray* token_arr, size_t* pos, TayNode* out) 
         .kind = TAY_STRING,
         .string =
             (TayString){
-                .str = token_arr->items[*pos].start,
-                .len = token_arr->items[*pos].len,
+                .str = curr_token.start,
+                .len = curr_token.len,
             },
     });
 
@@ -54,37 +60,91 @@ int parser_parse_flow_element(TokenArray* token_arr, size_t* pos, TayNode* out) 
 }
 
 int parser_parse_flow_list(TokenArray* token_arr, size_t* pos, TayNode* out) {
+    TayToken curr_token = token_arr->items[*pos];
+
     out->kind = TAY_LIST;
     out->list.items = NULL;
     out->list.cap = 0;
     out->list.len = 0;
 
-    while (token_arr->items[*pos].kind != TOKEN_RBRACKET &&
-           token_arr->items[*pos].kind != TOKEN_END) {
+    while (curr_token.kind != TOKEN_RBRACKET && curr_token.kind != TOKEN_END) {
         array_push(&out->list, (TayNode){0});
         if (parser_parse_flow_element(token_arr, pos, &out->list.items[out->list.len - 1])) {
             return -1;
         }
-
-        if (token_arr->items[*pos].kind == TOKEN_LBRACKET) {
+        if (curr_token.kind == TOKEN_LBRACKET) {
             break;
         }
-        if (token_arr->items[*pos].kind != TOKEN_COMMA) {
+        if (curr_token.kind != TOKEN_COMMA) {
             fprintf(stderr, "Error: comma expected\n");
             return -1;
         }
         (*pos)++;
     }
 
-    if (token_arr->items[*pos].kind == TOKEN_END) {
+    if (curr_token.kind == TOKEN_END) {
         fprintf(stderr, "Error: unterminated flow list\n");
         return -1;
     }
 
     (*pos)++;
+
     return 0;
 }
 
-// TODO: Finish parser implementation
-int parser_parse_map(TokenArray* token_arr, size_t* pos, TayNode* out) { return -1; };
-int parser_parse_list(TokenArray* token_arr, size_t* pos, TayNode* out) { return -1; };
+int parser_parse_map(TokenArray* token_arr, size_t* pos, TayNode* out) {
+    TayToken curr_token = token_arr->items[*pos];
+
+    out->kind = TAY_MAP;
+    out->map.entries = NULL;
+    out->map.cap = 0;
+    out->map.len = 0;
+
+    while (curr_token.kind != TOKEN_END && curr_token.kind != TOKEN_DEDENT) {
+        if (token_arr->len < 2 || curr_token.kind != TOKEN_STRING ||
+            token_arr->items[(*pos)++].kind != TOKEN_COLON) {
+            fprintf(stderr, "Error: expected valid map key\n");
+            return -1;
+        }
+
+        (*pos) += 2;
+
+        array_push(&out->list, (TayNode){0});
+        if (parser_parse_element(token_arr, pos, &out->map.entries[out->map.len - 1])) {
+            return -1;
+        }
+    }
+
+    (*pos)++;
+
+    return -1;
+};
+
+int parser_parse_list(TokenArray* token_arr, size_t* pos, TayNode* out) {
+    TayToken curr_token = token_arr->items[*pos];
+
+    out->kind = TAY_LIST;
+    out->list.items = NULL;
+    out->list.cap = 0;
+    out->list.len = 0;
+
+    while (curr_token.kind != TOKEN_END && curr_token.kind != TOKEN_DEDENT) {
+        if (curr_token.kind != TOKEN_DASH) {
+            fprintf(stderr, "Error: expected list element\n");
+            return -1;
+        }
+
+        (*pos)++;
+
+        array_push(&out->list, (TayNode){0});
+        if (parser_parse_element(token_arr, pos, &out->list.items[out->list.len - 1])) {
+            return -1;
+        }
+
+        (*pos)++;
+
+        return -1;
+    };
+
+    return 0;
+}
