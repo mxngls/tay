@@ -6,6 +6,7 @@ SRC = src
 BUILD = build
 
 OUT = $(BUILD)/tay
+OBJ = $(BUILD)/main.o $(BUILD)/tokenizer.o $(BUILD)/parser.o
 
 TEST_TOKENIZER = $(BUILD)/test_tokenizer
 TEST_TOKENIZER_OBJ = $(BUILD)/test_tokenizer.o $(BUILD)/tokenizer.o
@@ -22,6 +23,7 @@ $(TEST_TOKENIZER): $(TEST_TOKENIZER_OBJ)
 
 $(BUILD)/test_tokenizer.o $(BUILD)/tokenizer.o: $(SRC)/tokenizer.h
 $(BUILD)/tokenizer.o: $(SRC)/array.h
+$(BUILD)/parser.o: $(SRC)/parser.h $(SRC)/tokenizer.h $(SRC)/array.h
 
 $(BUILD)/%.o: $(SRC)/%.c | $(BUILD)
 	$(CC) $(CFLAGS) -c $< -o $@
