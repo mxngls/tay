@@ -24,6 +24,27 @@ int parser_parse_element(TokenArray* token_arr, size_t* pos, TayNode* out) {
         return parser_parse_list(token_arr, pos, out);
     }
 
+    if (curr_token.kind == TOKEN_PIPE) {
+        // NOTE: We don't yet have a dedicated function to parse the contents of a block-string.
+        // Simmply letting things fall through __should__ work as parser_parse_flow_element should
+        // eventually pick up the dangling string token, but parsing this here more explicitly seems
+        // less error prone.
+        (*pos)++;
+        if (curr_token.kind != TOKEN_STRING) {
+            fprintf(stderr, "Error: string expected\n");
+            return -1;
+        }
+        *out = ((TayNode){
+            .kind = TAY_STRING,
+            .string =
+                (TayString){
+                    .str = curr_token.start,
+                    .len = curr_token.len,
+                },
+        });
+        (*pos)++;
+    }
+
     if (token_arr->len > 2 && curr_token.kind == TOKEN_STRING &&
         next_curr_token.kind == TOKEN_COLON) {
         return parser_parse_map(token_arr, pos, out);
