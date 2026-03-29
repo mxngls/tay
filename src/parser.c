@@ -29,7 +29,7 @@ int parser_parse_element(TokenArray* token_arr, size_t* pos, TayNode* out) {
 
     (*pos)++;
 
-    return parser_parse_element(token_arr, pos, out);
+    return parser_parse_flow_element(token_arr, pos, out);
 }
 
 int parser_parse_flow_element(TokenArray* token_arr, size_t* pos, TayNode* out) {
