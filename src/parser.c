@@ -116,30 +116,39 @@ int parser_parse_flow_list(TokenArray* token_arr, size_t* pos, TayNode* out) {
 }
 
 int parser_parse_map(TokenArray* token_arr, size_t* pos, TayNode* out) {
-    TayToken curr_token = token_arr->items[*pos];
 
     out->kind = TAY_MAP;
-    out->map.entries = NULL;
+    out->map.items = NULL;
     out->map.cap = 0;
     out->map.len = 0;
 
-    while (curr_token.kind != TOKEN_END && curr_token.kind != TOKEN_DEDENT) {
-        if (token_arr->len < 2 || curr_token.kind != TOKEN_STRING ||
-            token_arr->items[(*pos)++].kind != TOKEN_COLON) {
+    while (token_arr->items[*pos].kind != TOKEN_END &&
+           token_arr->items[*pos].kind != TOKEN_DEDENT) {
+        bool is_map_start = token_arr->len >= 2 && token_arr->items[(*pos) + 1].kind == TOKEN_COLON;
+        bool is_map_key = token_arr->items[*pos].kind == TOKEN_STRING;
+        if (!is_map_key || !is_map_start) {
             fprintf(stderr, "Error: expected valid map key\n");
             return -1;
         }
 
+        array_push(&out->map, ((TayNode){
+                                  .kind = TAY_STRING,
+                                  .string =
+                                      (TayString){
+                                          .str = token_arr->items[*pos].start,
+                                          .len = token_arr->items[*pos].len,
+                                      },
+                              }));
+
         // advance past colon token and indent
         (*pos) += 2;
 
-        array_push(&out->list, (TayNode){0});
-        if (parser_parse_element(token_arr, pos, &out->map.entries[out->map.len - 1])) {
+        if (parser_parse_element(token_arr, pos, &out->map.items[out->map.len - 1])) {
             return -1;
         }
     }
 
-    return -1;
+    return 0;
 };
 
 int parser_parse_list(TokenArray* token_arr, size_t* pos, TayNode* out) {

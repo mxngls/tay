@@ -21,7 +21,7 @@ typedef struct tay_string {
 
 typedef struct tay_node {
     TayNodeKind kind;
-    TayString   key;
+    size_t      len;
     union {
         TayString string;
         struct {
@@ -30,7 +30,7 @@ typedef struct tay_node {
             size_t           cap;
         } list;
         struct {
-            struct tay_node* entries;
+            struct tay_node* items;
             size_t           len;
             size_t           cap;
         } map;
