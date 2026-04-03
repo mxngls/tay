@@ -93,7 +93,9 @@ int parser_parse_flow_list(TokenArray* token_arr, size_t* pos, TayNode* out) {
         if (parser_parse_flow_element(token_arr, pos, &out->list.items[out->list.len - 1])) {
             return -1;
         }
-        if (curr_token.kind == TOKEN_LBRACKET) {
+        curr_token = token_arr->items[*pos];
+
+        if (curr_token.kind == TOKEN_RBRACKET) {
             break;
         }
         if (curr_token.kind != TOKEN_COMMA) {
@@ -108,6 +110,9 @@ int parser_parse_flow_list(TokenArray* token_arr, size_t* pos, TayNode* out) {
         fprintf(stderr, "Error: unterminated flow list\n");
         return -1;
     }
+
+    // handle closing bracket
+    (*pos)++;
 
     return 0;
 }
