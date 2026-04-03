@@ -30,6 +30,7 @@ int parser_parse_element(TokenArray* token_arr, size_t* pos, TayNode* out) {
         // eventually pick up the dangling string token, but parsing this here more explicitly seems
         // less error prone.
         (*pos)++;
+        curr_token = token_arr->items[*pos];
         if (curr_token.kind != TOKEN_STRING) {
             fprintf(stderr, "Error: string expected\n");
             return -1;
@@ -43,6 +44,8 @@ int parser_parse_element(TokenArray* token_arr, size_t* pos, TayNode* out) {
                 },
         });
         (*pos)++;
+        curr_token = token_arr->items[*pos];
+        return 0;
     }
 
     if (token_arr->len > 2 && curr_token.kind == TOKEN_STRING &&
