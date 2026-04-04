@@ -37,8 +37,8 @@ int parser_parse_element(TokenArray* token_arr, size_t* pos, TayNode* out) {
         }
         out->kind = TAY_BLOCK_STRING;
         out->string = (TayString){
-                    .str = curr_token.start,
-                    .len = curr_token.len,
+            .str = curr_token.start,
+            .len = curr_token.len,
         };
 
         (*pos)++;
@@ -71,8 +71,8 @@ int parser_parse_flow_element(TokenArray* token_arr, size_t* pos, TayNode* out) 
 
     out->kind = TAY_STRING;
     out->string = (TayString){
-                .str = curr_token.start,
-                .len = curr_token.len,
+        .str = curr_token.start,
+        .len = curr_token.len,
     };
 
     (*pos)++;
@@ -136,8 +136,8 @@ int parser_parse_map(TokenArray* token_arr, size_t* pos, TayNode* out) {
         // add key
         array_push(&out->map, (TayNode){0});
         out->map.items[out->map.len - 1].key = (TayString){
-                                          .str = token_arr->items[*pos].start,
-                                          .len = token_arr->items[*pos].len,
+            .str = token_arr->items[*pos].start,
+            .len = token_arr->items[*pos].len,
         };
 
         // advance past colon token and indent
@@ -152,7 +152,7 @@ int parser_parse_map(TokenArray* token_arr, size_t* pos, TayNode* out) {
 };
 
 int parser_parse_list(TokenArray* token_arr, size_t* pos, TayNode* out) {
-    out->kind = TAY_LIST;
+    out->kind = TAY_BLOCK_LIST;
     out->list.items = NULL;
     out->list.cap = 0;
     out->list.len = 0;

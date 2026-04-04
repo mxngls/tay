@@ -11,6 +11,7 @@ typedef enum {
     TAY_STRING,
     TAY_BLOCK_STRING,
     TAY_LIST,
+    TAY_BLOCK_LIST,
     TAY_MAP,
 } TayNodeKind;
 
