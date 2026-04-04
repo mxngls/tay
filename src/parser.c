@@ -35,7 +35,7 @@ int parser_parse_element(TokenArray* token_arr, size_t* pos, TayNode* out) {
             fprintf(stderr, "Error: string expected\n");
             return -1;
         }
-        out->kind = TAY_STRING;
+        out->kind = TAY_BLOCK_STRING;
         out->string = (TayString){
                     .str = curr_token.start,
                     .len = curr_token.len,
