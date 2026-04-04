@@ -31,7 +31,7 @@ int parser_parse_element(TokenArray* token_arr, size_t* pos, TayNode* out) {
         // less error prone.
         (*pos)++;
         curr_token = token_arr->items[*pos];
-        if (curr_token.kind != TOKEN_STRING) {
+        if (curr_token.kind != TOKEN_BARE_STRING) {
             fprintf(stderr, "Error: string expected\n");
             return -1;
         }
@@ -47,7 +47,7 @@ int parser_parse_element(TokenArray* token_arr, size_t* pos, TayNode* out) {
         return 0;
     }
 
-    if (token_arr->len > 2 && curr_token.kind == TOKEN_STRING &&
+    if (token_arr->len > 2 && curr_token.kind == TOKEN_BARE_STRING &&
         next_curr_token.kind == TOKEN_COLON) {
         return parser_parse_map(token_arr, pos, out);
     }
@@ -127,7 +127,7 @@ int parser_parse_map(TokenArray* token_arr, size_t* pos, TayNode* out) {
     while (token_arr->items[*pos].kind != TOKEN_END &&
            token_arr->items[*pos].kind != TOKEN_DEDENT) {
         bool is_map_start = token_arr->len >= 2 && token_arr->items[(*pos) + 1].kind == TOKEN_COLON;
-        bool is_map_key = token_arr->items[*pos].kind == TOKEN_STRING;
+        bool is_map_key = token_arr->items[*pos].kind == TOKEN_BARE_STRING;
         if (!is_map_key || !is_map_start) {
             fprintf(stderr, "Error: expected valid map key\n");
             return -1;

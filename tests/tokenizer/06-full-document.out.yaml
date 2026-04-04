@@ -1,23 +1,23 @@
-STRING     indent=0 "title"
+BARE_STRING indent=0 "title"
 COLON      indent=0 ":"
 STRING     indent=0 "My Application"
-STRING     indent=0 "created_at"
+BARE_STRING indent=0 "created_at"
 COLON      indent=0 ":"
 STRING     indent=0 "2024-03-15 10:00:00"
-STRING     indent=0 "updated_at"
+BARE_STRING indent=0 "updated_at"
 COLON      indent=0 ":"
 STRING     indent=0 "2024-03-15 14:30:00"
-STRING     indent=0 "tags"
+BARE_STRING indent=0 "tags"
 COLON      indent=0 ":"
 LBRACKET   indent=0 "["
 STRING     indent=0 "web"
 COMMA      indent=0 ","
 STRING     indent=0 "static-site"
 RBRACKET   indent=0 "]"
-STRING     indent=0 "description"
+BARE_STRING indent=0 "description"
 COLON      indent=0 ":"
 PIPE       indent=0 "|"
-STRING     indent=1 "  This is a sample document demonstrating
+BARE_STRING indent=1 "  This is a sample document demonstrating
   all supported features.
 
   It includes multiline text blocks.

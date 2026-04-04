@@ -15,7 +15,8 @@ typedef struct cursor {
 } TayCursor;
 
 typedef enum {
-    TOKEN_STRING = 1,
+    TOKEN_BARE_STRING = 1,
+    TOKEN_STRING,
     TOKEN_COLON,
     TOKEN_COMMA,
     TOKEN_DASH,

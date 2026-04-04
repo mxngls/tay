@@ -1,0 +1,12 @@
+MAP
+  STRING title "My Application"
+  STRING created_at "2024-03-15 10:00:00"
+  STRING updated_at "2024-03-15 14:30:00"
+  FLOW_LIST tags
+      STRING "web"
+      STRING "static-site"
+  BLOCK_STRING description "  This is a sample document demonstrating
+  all supported features.
+
+  It includes multiline text blocks.
+"

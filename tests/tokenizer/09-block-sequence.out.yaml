@@ -1,4 +1,4 @@
-STRING     indent=0 "tags"
+BARE_STRING indent=0 "tags"
 COLON      indent=0 ":"
 INDENT     indent=0 ""
 DASH       indent=2 "-"

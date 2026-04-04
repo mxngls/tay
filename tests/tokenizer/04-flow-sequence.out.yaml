@@ -1,4 +1,4 @@
-STRING     indent=0 "tags"
+BARE_STRING indent=0 "tags"
 COLON      indent=0 ":"
 LBRACKET   indent=0 "["
 STRING     indent=0 "programming"

@@ -1,6 +1,6 @@
-STRING     indent=0 "title"
+BARE_STRING indent=0 "title"
 COLON      indent=0 ":"
-STRING     indent=0 "description"
+BARE_STRING indent=0 "description"
 COLON      indent=0 ":"
 STRING     indent=0 "has value"
 END        indent=0 ""

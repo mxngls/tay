@@ -5,6 +5,7 @@
 
 // clang-format off
 static const char *token_kind_str[] = {
+    [TOKEN_BARE_STRING]	= "BARE_STRING",
     [TOKEN_STRING]	= "STRING",
     [TOKEN_COLON]	= "COLON",
     [TOKEN_COMMA]	= "COMMA",

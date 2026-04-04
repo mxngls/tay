@@ -1,7 +1,7 @@
-STRING     indent=0 "description"
+BARE_STRING indent=0 "description"
 COLON      indent=0 ":"
 PIPE       indent=0 "|"
-STRING     indent=1 "  This is a multiline string.
+BARE_STRING indent=1 "  This is a multiline string.
   Line breaks are preserved exactly.
 
   Blank lines work too.

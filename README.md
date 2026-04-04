@@ -64,8 +64,9 @@ Spec references:
 ### Block Mappings
 
 Key-value pairs where keys are plain (unquoted) identifiers followed
-by `: ` and a value. Nested mappings are supported through
-indentation.
+by `: ` and a value. Values can be any supported type: double-quoted
+scalars, literal block scalars, block sequences, flow sequences, or
+nested mappings. Nesting is expressed through indentation.
 
 ```yaml
 title: "My Application"
@@ -80,10 +81,15 @@ Spec reference:
 
 ### Block Sequences
 
-List items use `- ` (dash followed by a space). Each item can contain
-a value or a group of key-value pairs at an indented level.
+List items use `- ` (dash followed by a space). Each item can be a
+double-quoted scalar, a plain scalar, a nested mapping, a flow
+sequence, a block scalar, or another block sequence.
 
 ```yaml
+colors:
+  - "red"
+  - "blue"
+  - "green"
 authors:
   - name: "Alice"
     email: "alice@example.com"
@@ -91,8 +97,7 @@ authors:
     email: "bob@example.com"
 ```
 
-The dash must be followed by a space and content on the same line.
-Nested sequences are not supported.
+The dash must be followed by a space.
 
 Spec reference:
 [§8.2.1](https://yaml.org/spec/1.2.2/#821-block-sequences)
@@ -115,14 +120,18 @@ Spec reference:
 
 ### Plain Scalars
 
-Bare (unquoted) strings are supported as both keys and values. A
-plain scalar terminates at `: `, `[`, `"`, `|`, or newline. The
-colon and hash characters only act as terminators when followed or
-preceded by whitespace respectively, consistent with the spec.
+Bare (unquoted) strings are supported as map keys and as block
+sequence items. A plain scalar terminates at `: `, `[`, `"`, `|`,
+or newline. The colon and hash characters only act as terminators
+when followed or preceded by whitespace respectively, consistent
+with the spec.
 
 ```yaml
-url: http://example.com
-color: #ff0000
+title: "My Document"
+created_at: "2024-03-15 10:00:00"
+colors:
+  - red
+  - blue
 ```
 
 The full spec's plain scalar rules are significantly more complex,
@@ -156,8 +165,8 @@ Spec reference:
 
 ### Flow Sequences
 
-Inline lists of double-quoted strings are supported. Nested sequences
-and flow mappings are not.
+Inline lists of double-quoted strings. Nested sequences, plain
+strings, and flow mappings are not supported.
 
 ```yaml
 tags: ["programming", "c", "yaml"]

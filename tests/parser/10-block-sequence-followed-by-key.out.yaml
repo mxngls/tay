@@ -1,0 +1,5 @@
+MAP
+  LIST tags
+      STRING "programming"
+      STRING "c"
+  STRING title "My Document"

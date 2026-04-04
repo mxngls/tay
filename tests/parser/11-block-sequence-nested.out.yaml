@@ -1,0 +1,7 @@
+MAP
+  LIST matrix
+      MAP
+          LIST outer1
+              STRING "inner1"
+              STRING "inner2"
+      STRING "outer2"

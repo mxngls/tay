@@ -1,0 +1,5 @@
+MAP
+  FLOW_LIST tags
+      STRING "programming"
+      STRING "c"
+      STRING "yaml"

@@ -20,22 +20,20 @@ typedef struct tay_string {
     size_t len;
 } TayString;
 
+typedef struct {
+    struct tay_node* items;
+    size_t           len;
+    size_t           cap;
+} TayNodeChildren;
+
 typedef struct tay_node {
     TayNodeKind kind;
     TayString   key;
     size_t      len;
     union {
-        TayString string;
-        struct {
-            struct tay_node* items;
-            size_t           len;
-            size_t           cap;
-        } list;
-        struct {
-            struct tay_node* items;
-            size_t           len;
-            size_t           cap;
-        } map;
+        TayString       string;
+        TayNodeChildren list;
+        TayNodeChildren map;
     };
 } TayNode;
 

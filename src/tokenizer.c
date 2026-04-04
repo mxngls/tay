@@ -119,7 +119,7 @@ static int tokenizer_tokenize_bare_block(TayCursor* c, size_t parent_indent, Tok
             // end of block reached
             if (indent <= parent_indent) {
                 if (array_push(tokens, ((TayToken){
-                                           .kind = TOKEN_STRING,
+                                           .kind = TOKEN_BARE_STRING,
                                            .start = start,
                                            .len = c->pos - start_pos,
                                            .indent = parent_indent + 1,
@@ -165,7 +165,7 @@ static int tokenizer_tokenize_bare_str(TayCursor* c, TokenArray* tokens, TayInde
     size_t len = cursor_current(c) - start;
     cursor_skip_ws(c);
     if (len > 0) {
-        if (array_push(tokens, ((TayToken){.kind = TOKEN_STRING,
+        if (array_push(tokens, ((TayToken){.kind = TOKEN_BARE_STRING,
                                            .start = start,
                                            .len = len,
                                            .indent = array_back(indents)}))) {

@@ -1,0 +1,6 @@
+MAP
+  BLOCK_STRING description "  This is a multiline string.
+  Line breaks are preserved exactly.
+
+  Blank lines work too.
+"

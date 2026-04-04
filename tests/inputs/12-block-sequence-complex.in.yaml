@@ -9,8 +9,8 @@ dependencies:
     versions:
       - "3.0"
 tags:
-  - core
-  - stable
+  - "core"
+  - "stable"
 description: |
   A complex document with nested
   block sequences and mixed values.
